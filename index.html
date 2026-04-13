@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navy Blog - Clean & Professional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --navy-deep: #0a192f;
+            --navy-light: #112240;
+            --accent-blue: #007bff;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ffffff;
+            color: var(--navy-deep);
+        }
+
+        /* 1. Navbar Navy */
+        .navbar {
+            background-color: var(--navy-deep) !important;
+            padding: 1rem 0;
+        }
+        .navbar-brand { font-weight: 800; letter-spacing: 1px; color: #fff !important; }
+        .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; }
+        .nav-link:hover { color: #fff !important; }
+
+        /* 2. Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-light) 100%);
+            color: white;
+            padding: 80px 0;
+            border-bottom: 5px solid var(--accent-blue);
+        }
+
+        /* 3. Card Berita - Ukuran Disamakan */
+        .card {
+            border: 1px solid #eef0f2;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(10, 25, 47, 0.1);
+        }
+        
+        /* Memastikan gambar card punya rasio yang sama */
+        .card-img-container {
+            height: 200px;
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
+        }
+        .card-img-top {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Membuat body card mengisi sisa ruang */
+        }
+        .card-text {
+            flex-grow: 1; /* Memastikan teks deskripsi mengambil ruang yang tersedia agar button sejajar */
+            color: #555;
+        }
+
+        .btn-navy {
+            background-color: var(--navy-deep);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .btn-navy:hover {
+            background-color: var(--navy-light);
+            color: white;
+        }
+
+        /* 4. Footer Navy */
+        footer {
+            background-color: var(--navy-deep);
+            color: white;
+            padding: 40px 0;
+            margin-top: 80px;
+        }
+        .footer-link {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+        }
+        .footer-link:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Overthinker.id</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Articles</a></li>
+                    <li class="nav-item ms-lg-3"><a class="btn btn-outline-light px-4" href="#">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-3">Informasi Terpercaya di Ujung Jari.</h1>
+                    <p class="lead mb-4 text-white-50">Menyajikan artikel pilihan seputar teknologi, pendidikan, dan gaya hidup dengan sudut pandang modern ala Gen Z.</p>
+                    <a href="#articles" class="btn btn-primary btn-lg px-5 rounded-pill">Explore Sekarang</a>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80" class="img-fluid rounded-4 shadow-lg" alt="Hero">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container my-5" id="articles">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Artikel Terbaru</h2>
+            <div style="width: 60px; height: 4px; background: var(--accent-blue); margin: 10px auto;"></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-container">
+                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&q=80" class="card-img-top" alt="Article 1">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Tips Coding Menyenangkan</h5>
+                        <p class="card-text">Belajar pemrograman tidak harus membosankan. Simak cara asik kuasai bahasa baru dengan cepat.</p>
+                        <a href="#" class="btn btn-navy mt-auto">Gas baca</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-container">
+                        <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&q=80" class="card-img-top" alt="Article 2">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Recharge Diri Tanpa Keluar Rumah</h5>
+                        <p class="card-text">Kadang yang kita butuhkan adalah waktu buat diri sendiri. Temukan cara sederhana untuk mengisi ulang energi tanpa harus pergi kemana- mana.</p>
+                        <a href="#" class="btn btn-navy mt-auto">Gas baca</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-container">
+                        <img src="https://images.unsplash.com/photo-1516383274235-5f42d6c6426d?w=800&q=80" class="card-img-top" alt="Article 3">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">Sehari Tanpa HP, Apa yang Terjadi?</h5>
+                        <p class="card-text">Mampukah kita bertahan tanpa HP selama sehari? Temukan cerita dan pelajaran sederhana tentang fokus dan ketenangan.</p>
+                        <a href="#" class="btn btn-navy mt-auto">Gas baca</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center text-md-start">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <h4 class="fw-bold">Overthinker.id</h4>
+                    <p class="text-white-50 small">Platform edukasi dan berita terupdate untuk generasi digital Indonesia.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="mb-3">
+                        <a href="#" class="footer-link me-3">Tiktok</a>
+                        <a href="#" class="footer-link me-3">Instagram</a>
+                        <a href="#" class="footer-link">Twitter</a>
+                    </div>
+                    <p class="text-white-50 small">&copy; 2026 Overthinker.id. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
