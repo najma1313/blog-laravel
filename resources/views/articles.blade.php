@@ -1,103 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Articles</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Articles - MyBlog</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Tambahan dikit biar gambar seragam ukurannya */
-        .card-img-top {
-            height: 180px;
-            object-fit: cover;
-        }
-        .card {
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: 0.3s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
+        body { background-color: #fdfaf9; font-family: 'Poppins', sans-serif; }
+        .navbar { background-color: #44140a; }
+        .card { border-radius: 15px; border: none; transition: 0.3s; overflow: hidden; height: 100%; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .btn-add { background-color: #44140a; color: white; border-radius: 8px; font-weight: bold; }
+        .btn-add:hover { background-color: #5d1d0e; color: white; }
+        .article-img { height: 200px; width: 100%; object-fit: cover; }
+        .card-title { color: #44140a; font-weight: bold; font-size: 1.1rem; }
+        .btn-delete { color: #b04444; border: 1px solid #ebcccc; border-radius: 6px; padding: 2px 12px; text-decoration: none; font-size: 0.85rem; background: white; }
+        .btn-delete:hover { background: #f2dede; }
+        .nav-link { color: rgba(255,255,255,0.8) !important; padding: 10px 0; }
+        .nav-link:hover { color: white !important; }
     </style>
 </head>
-<body style="background:#f5f7fa;">
+<body>
 
-<nav class="navbar" style="background:#44140a;">
-  <div class="container">
-    <a class="navbar-brand text-white" href="/">MyBlog</a>
-    <div>
-      <a href="/" class="text-white me-3">Home</a>
-      <a href="/profile" class="text-white me-3">Profile</a>
-      <a href="/articles" class="text-white me-3">Articles</a>
-      <a href="/contact" class="text-white">Contact</a>
+<nav class="navbar navbar-expand-lg navbar-dark mb-5 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">MyBlog</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- MENU LENGKAP SESUAI GAMBAR -->
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+                <li class="nav-item"><a class="nav-link active fw-bold" href="/articles">Articles</a></li>
+                <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
-<div class="container mt-5">
-    <h2 class="text-center mb-4">My Articles</h2>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 style="color: #44140a; font-weight: bold;">My Articles</h2>
+        <a href="{{ route('articles.create') }}" class="btn btn-add shadow-sm">+ Tambah Artikel</a>
+    </div>
 
-    <div class="row g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        
+        <!-- DATA ASLI DARI DATABASE -->
+        @foreach ($articles as $article)
+            <div class="col">
+                <div class="card shadow-sm">
+                    <img src="{{ $article->image_url ? asset('images/' . $article->image_url) : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=500' }}" class="article-img">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ $article->title }}</h5>
+                        <p class="text-muted small">{{ Str::limit($article->content, 60) }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">{{ $article->created_at->format('d M Y') }}</small>
+                            <form action="{{ route('articles.destroy', $article->id) }}" method="POST">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn-delete" onclick="return confirm('Hapus?')">Hapus</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
 
-        <div class="col-md-4">
-            <div class="card p-3 h-100">
-                <img src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=500" class="card-img-top rounded mb-3" alt="Laravel">
-                <h5>Mastering MVC Laravel</h5>
-                <p class="text-muted small">Memahami alur kerja Model, View, dan Controller untuk web yang lebih terstruktur.</p>
-                <a href="#" class="btn btn-outline-dark mt-auto">Read More</a>
+        <!-- 5 CARD CONTOH (TEMA BERBEDA) -->
+        <div class="col">
+            <div class="card shadow-sm">
+                <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=500" class="article-img">
+                <div class="card-body">
+                    <h5 class="card-title">Rekomendasi Coffeeshop Hits Salatiga</h5>
+                    <p class="text-muted small">Tempat nongkrong asik dengan vibes sejuk dan kopi lokal terbaik.</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">04 May 2026</small>
+                        <button class="btn-delete">Hapus</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card p-3 h-100">
-                <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=500" class="card-img-top rounded mb-3" alt="Flutter">
-                <h5>Build App with Flutter</h5>
-                <p class="text-muted small">Eksperimen menyusun widget untuk membangun CoffeeApp yang estetik dan fungsional.</p>
-                <a href="#" class="btn btn-outline-dark mt-auto">Read More</a>
+        <div class="col">
+            <div class="card shadow-sm">
+                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=500" class="article-img">
+                <div class="card-body">
+                    <h5 class="card-title">Sunrise di Puncak Gunung Merbabu</h5>
+                    <p class="text-muted small">Momen magis saat matahari terbit di balik samudra awan.</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">03 May 2026</small>
+                        <button class="btn-delete">Hapus</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card p-3 h-100">
-                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=500" class="card-img-top rounded mb-3" alt="Merbabu">
-                <h5>Merbabu: Above the Clouds</h5>
-                <p class="text-muted small">Dokumentasi perjalanan mendaki jalur Selo dan keindahan sabana di puncak gunung.</p>
-                <a href="#" class="btn btn-outline-dark mt-auto">Read More</a>
+        <div class="col">
+            <div class="card shadow-sm">
+                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=500" class="article-img">
+                <div class="card-body">
+                    <h5 class="card-title">Kuliner Malam Ronde Sekoteng</h5>
+                    <p class="text-muted small">Menghangatkan badan dengan jahe dan ronde legendaris Salatiga.</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">02 May 2026</small>
+                        <button class="btn-delete">Hapus</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card p-3 h-100">
-                <img src="https://images.unsplash.com/photo-1526285849717-482456cd7436?w=500" class="card-img-top rounded mb-3" alt="Polaroid">
-                <h5>The Art of Polaroid Blur</h5>
-                <p class="text-muted small">Teknik menggunakan hard flash dan intentional blur untuk hasil foto yang sangat nostalgia.</p>
-                <a href="#" class="btn btn-outline-dark mt-auto">Read More</a>
+        <div class="col">
+            <div class="card shadow-sm">
+                <img src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=500" class="article-img">
+                <div class="card-body">
+                    <h5 class="card-title">Tips Foto Polaroid Aesthetic</h5>
+                    <p class="text-muted small">Teknik flash dan framing untuk hasil foto yang vintage abis.</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">01 May 2026</small>
+                        <button class="btn-delete">Hapus</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card p-3 h-100">
-                <img src="https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=500" class="card-img-top rounded mb-3" alt="GitHub">
-                <h5>Commit Your Code!</h5>
-                <p class="text-muted small">Tips mengelola repositori GitHub agar tugas kuliah semester 2 kamu tetap terorganisir.</p>
-                <a href="#" class="btn btn-outline-dark mt-auto">Read More</a>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card p-3 h-100">
-                <img src="https://images.unsplash.com/photo-1558655146-d09347e92766?w=500" class="card-img-top rounded mb-3" alt="UI Design">
-                <h5>Aesthetic Gradient Tips</h5>
-                <p class="text-muted small">Cara memilih perpaduan warna gradient yang modern dan nyaman untuk user interface.</p>
-                <a href="#" class="btn btn-outline-dark mt-auto">Read More</a>
+        <div class="col">
+            <div class="card shadow-sm">
+                <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=500" class="article-img">
+                <div class="card-body">
+                    <h5 class="card-title">Productive Day: Work from Cafe</h5>
+                    <p class="text-muted small">Cara tetap fokus menyelesaikan tugas kuliah sambil menikmati latte.</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">30 Apr 2026</small>
+                        <button class="btn-delete">Hapus</button>
+                    </div>
+                </div>
             </div>
         </div>
 
     </div>
 </div>
 
-<footer class="text-center mt-5 p-3" style="background:#44160a;color:white;">
-    ©️ 2026 Najma Fatiha
-</footer>
+<footer class="py-5"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
