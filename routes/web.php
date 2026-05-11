@@ -26,5 +26,14 @@ Route::get('/articles/create', [ArticleController::class, 'create'])->name('arti
 // PROSES simpan artikel ke database
 Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
 
+// --- TAMBAHAN ROUTE EDIT & UPDATE ---
+// Menampilkan FORM edit artikel berdasarkan ID
+Route::get('/articles/{id}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+
+// PROSES simpan perubahan (update) artikel ke database
+Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
+// ------------------------------------
+
 // PROSES hapus artikel berdasarkan ID
 Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+
