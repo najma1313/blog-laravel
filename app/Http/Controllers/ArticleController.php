@@ -4,100 +4,93 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Article;
-use Illuminate\Support\Facades\File;
 
 class ArticleController extends Controller
 {
-    // 1. Menampilkan semua artikel
+    // tampil artikel
     public function index()
     {
-        $articles = Article::all();
+        $articles = Article::latest()->get();
+
         return view('articles', compact('articles'));
     }
 
-    // 2. Menampilkan form tambah artikel
+    // form tambah
     public function create()
     {
         return view('create');
     }
 
-    // 3. Menyimpan artikel baru
+    // simpan artikel
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required',
-            'content' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'title' => 'required|min:3',
+            'description' => 'required|min:5',
+            'image' => 'required|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        $imageName = null;
-        if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            if (!File::isDirectory(public_path('images'))) {
-                File::makeDirectory(public_path('images'), 0777, true, true);
-            }
-            $request->image->move(public_path('images'), $imageName);
-        }
+        // upload gambar
+        $imageName = time().'.'.$request->image->extension();
 
+        $request->image->move(public_path('images'), $imageName);
+
+        // simpan database
         Article::create([
             'title' => $request->title,
-            'content' => $request->content,
-            'image_url' => $imageName,
+            'description' => $request->description,
+            'image' => $imageName
         ]);
 
-        return redirect()->route('articles.index')->with('success', 'Artikel Berhasil Ditambahkan!');
+        return redirect('/articles')
+            ->with('success', 'Artikel berhasil ditambahkan');
     }
 
-    // 4. Menampilkan form edit (DIUBAH KE VIEW 'edit' AGAR SESUAI)
+    // form edit
     public function edit($id)
     {
         $article = Article::findOrFail($id);
-        // Memanggil file: resources/views/edit.blade.php
+
         return view('edit', compact('article'));
     }
 
-    // 5. Memproses update data
+    // update
     public function update(Request $request, $id)
     {
         $request->validate([
             'title' => 'required',
-            'content' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'description' => 'required'
         ]);
 
         $article = Article::findOrFail($id);
 
-        if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada upload gambar baru
-            if ($article->image_url) {
-                File::delete(public_path('images/' . $article->image_url));
-            }
+        // upload gambar baru
+        if($request->hasFile('image')){
 
-            $imageName = time() . '.' . $request->image->extension();
+            $imageName = time().'.'.$request->image->extension();
+
             $request->image->move(public_path('images'), $imageName);
-            $article->image_url = $imageName;
+
+            $article->image = $imageName;
         }
 
-        $article->update([
-            'title' => $request->title,
-            'content' => $request->content,
-        ]);
+        $article->title = $request->title;
+        $article->description = $request->description;
 
-        return redirect()->route('articles.index')->with('success', 'Artikel Berhasil Diperbarui!');
+        $article->save();
+
+        return redirect('/articles')
+            ->with('success', 'Artikel berhasil diupdate');
     }
 
-    // 6. Menghapus artikel
+    // hapus
     public function destroy($id)
     {
         $article = Article::findOrFail($id);
-        
-        // Hapus file gambar dari folder public/images
-        if ($article->image_url) {
-            File::delete(public_path('images/' . $article->image_url));
-        }
-        
+
         $article->delete();
 
-        return redirect()->route('articles.index')->with('success', 'Artikel Berhasil Dihapus!');
+        return redirect('/articles')
+            ->with('success', 'Artikel berhasil dihapus');
     }
 }

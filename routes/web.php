@@ -1,39 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\BlogController;
 
-// Route Halaman Statis
-Route::get('/', function () {
-    return view('home');
-});
+// Halaman Utama
+Route::get('/', [BlogController::class, 'home'])->name('home');
 
+// Halaman Profile
 Route::get('/profile', function () {
-    return view('profile');
-});
+    return view('pages.profile');
+})->name('profile');
 
+// Halaman Contact (Let's Talk)
 Route::get('/contact', function () {
-    return view('contact');
-});
+    return view('pages.contact');
+})->name('contact');
 
-// Route CRUD Articles
-// Menampilkan daftar artikel
-Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-
-// Menampilkan FORM tambah artikel
-Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
-
-// PROSES simpan artikel ke database
-Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
-
-// --- TAMBAHAN ROUTE EDIT & UPDATE ---
-// Menampilkan FORM edit artikel berdasarkan ID
-Route::get('/articles/{id}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
-
-// PROSES simpan perubahan (update) artikel ke database
-Route::put('/articles/{id}', [ArticleController::class, 'update'])->name('articles.update');
-// ------------------------------------
-
-// PROSES hapus artikel berdasarkan ID
-Route::delete('/articles/{id}', [ArticleController::class, 'destroy'])->name('articles.destroy');
-
+// Manajemen Artikel (Index, Store, Update, Destroy)
+Route::get('/articles', [BlogController::class, 'index'])->name('articles.index');
+Route::post('/articles', [BlogController::class, 'store'])->name('articles.store');
+Route::put('/articles/{id}', [BlogController::class, 'update'])->name('articles.update');
+Route::delete('/articles/{id}', [BlogController::class, 'destroy'])->name('articles.destroy');
