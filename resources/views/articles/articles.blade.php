@@ -7,9 +7,13 @@
             <h2 class="fw-bold" style="color: #800020;">Manajemen Konten</h2>
             <p class="text-muted">Buat narasi baru atau dokumentasikan petualanganmu di sini.</p>
         </div>
+        
+        {{-- Tombol Tulis Artikel - HANYA untuk user yang login --}}
+        @auth
         <button class="btn px-4 text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambah" style="background-color: #800020; border-radius: 50px;">
             <i class="bi bi-pencil-fill me-2"></i>Tulis Artikel
         </button>
+        @endauth
     </div>
 
     @if(session('success'))
@@ -35,19 +39,30 @@
                     <h5 class="fw-bold mb-2">{{ $article->title }}</h5>
                     <p class="text-muted small mb-4">{{ Str::limit($article->content, 90) }}</p>
                     
-                    <div class="mt-auto d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $article->id }}">
-                            Edit
-                        </button>
-                        <form action="{{ route('articles.destroy', $article->id) }}" method="POST" onsubmit="return confirm('Hapus artikel ini?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Hapus</button>
-                        </form>
+                    {{-- READ MORE (muncul untuk semua user) --}}
+                    <div class="mt-auto">
+                        <a href="{{ route('articles.show', $article->id) }}" class="text-decoration-none fw-bold d-inline-flex align-items-center mb-3" style="color: #800020; font-size: 0.85rem; letter-spacing: 0.5px;">
+                            READ MORE →
+                        </a>
+
+                        {{-- Edit & Hapus (HANYA untuk user yang login) --}}
+                        @auth
+                        <div class="d-flex gap-3">
+                            <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $article->id }}" style="background: none; border: none; color: #d4a837; font-size: 0.85rem; cursor: pointer; padding: 0;">Edit</button>
+                            <form action="{{ route('articles.destroy', $article->id) }}" method="POST" onsubmit="return confirm('Hapus artikel ini?')" class="d-inline">
+                                @csrf 
+                                @method('DELETE')
+                                <button type="submit" style="background: none; border: none; color: #dc3545; font-size: 0.85rem; cursor: pointer; padding: 0;">Hapus</button>
+                            </form>
+                        </div>
+                        @endauth
                     </div>
                 </div>
             </div>
         </div>
 
+        {{-- Modal Edit (HANYA muncul jika user login, tapi aman karena ada @auth di atas) --}}
+        @auth
         <div class="modal fade" id="modalEdit{{ $article->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-4 shadow-lg">
@@ -72,13 +87,13 @@
                             <div class="mb-3">
                                 <label class="form-label fw-bold small text-secondary">Gambar Utama</label>
                                 <div class="d-flex gap-2 mb-3">
-                                    <input type="radio" class="btn-check" name="edit_source_{{ $article->id }}" id="editF{{ $article->id }}" value="file" checked onclick="toggleEdit('file', {{ $article->id }})">
+                                    <input type="radio" class="btn-check" name="img_source_{{ $article->id }}" id="editF{{ $article->id }}" value="file" checked onclick="toggleEdit('file', {{ $article->id }})">
                                     <label class="btn btn-outline-custom flex-fill py-3 d-flex flex-column align-items-center gap-2" for="editF{{ $article->id }}">
                                         <i class="bi bi-cloud-arrow-up fs-4"></i>
                                         <span class="small fw-bold">Upload Lokal</span>
                                     </label>
 
-                                    <input type="radio" class="btn-check" name="edit_source_{{ $article->id }}" id="editL{{ $article->id }}" value="url" onclick="toggleEdit('url', {{ $article->id }})">
+                                    <input type="radio" class="btn-check" name="img_source_{{ $article->id }}" id="editL{{ $article->id }}" value="url" onclick="toggleEdit('url', {{ $article->id }})">
                                     <label class="btn btn-outline-custom flex-fill py-3 d-flex flex-column align-items-center gap-2" for="editL{{ $article->id }}">
                                         <i class="bi bi-link-45deg fs-4"></i>
                                         <span class="small fw-bold">Tautan URL</span>
@@ -101,10 +116,13 @@
                 </div>
             </div>
         </div>
+        @endauth
         @endforeach
     </div>
 </div>
 
+{{-- Modal Tambah Artikel (HANYA untuk user yang login) --}}
+@auth
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow-lg">
@@ -155,12 +173,12 @@
         </div>
     </div>
 </div>
+@endauth
 
 <style>
     .card-hover { transition: 0.3s; }
     .card-hover:hover { transform: translateY(-5px); }
     
-    /* Custom Button Outline ala Gambar Kanan */
     .btn-outline-custom {
         color: #495057;
         border: 1px solid #dee2e6;
@@ -175,7 +193,6 @@
         box-shadow: 0 0 0 1px #800020;
     }
     
-    /* Dashed Border untuk Upload */
     .border-dashed {
         border-style: dashed !important;
         border-width: 2px !important;

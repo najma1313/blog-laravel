@@ -16,38 +16,51 @@ class BlogController extends Controller
         return view('pages.home', compact('latestArticles'));
     }
 
-    // Menampilkan semua artikel di halaman Articles
+    // Menampilkan semua artikel
     public function index()
     {
         $articles = Article::latest()->get();
-        // PERBAIKAN: Ubah dari 'articles.articles' ke 'pages.articles' agar tidak error
         return view('articles.articles', compact('articles'));
     }
 
-    // SIMPAN Artikel Baru (Mendukung File & Link URL)
+    // Menampilkan detail artikel (READ MORE)
+    public function show($id)
+    {
+        $article = Article::findOrFail($id);
+        return view('articles.show', compact('article'));
+    }
+
+    // Menampilkan form edit artikel
+    public function edit($id)
+    {
+        $article = Article::findOrFail($id);
+        return view('articles.edit', compact('article'));
+    }
+
+    // Menampilkan form create artikel
+    public function create()
+    {
+        return view('articles.create');
+    }
+
+    // Menyimpan artikel baru
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'title' => 'required|min:5|max:255',
             'content' => 'required|min:10',
-            // Image nullable karena user bisa milih pakai Link URL
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
             'image_url' => 'nullable|url',
         ]);
 
-        // 2. Logika Pemilihan Sumber Gambar
         $finalImagePath = null;
 
         if ($request->img_source == 'file' && $request->hasFile('image')) {
-            // Jika user memilih upload file lokal
             $finalImagePath = $request->file('image')->store('articles', 'public');
-        } else {
-            // Jika user memasukkan link URL (misal dari Google/Unsplash)
+        } elseif ($request->img_source == 'url' && $request->filled('image_url')) {
             $finalImagePath = $request->image_url;
         }
 
-        // 3. Simpan ke Database
         Article::create([
             'title' => $request->title,
             'slug' => Str::slug($request->title) . '-' . time(),
@@ -55,10 +68,10 @@ class BlogController extends Controller
             'image_url' => $finalImagePath, 
         ]);
 
-        return redirect()->back()->with('success', 'Artikel Jema Archive berhasil diterbitkan!');
+        return redirect()->back()->with('success', 'Artikel berhasil diterbitkan!');
     }
 
-    // UPDATE Artikel
+    // Mengupdate artikel (dengan dukungan file upload & URL)
     public function update(Request $request, $id)
     {
         $article = Article::findOrFail($id);
@@ -67,38 +80,45 @@ class BlogController extends Controller
             'title' => 'required|min:5',
             'content' => 'required',
             'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|url',
         ]);
 
-        // Cek jika ada upload gambar baru
-        if ($request->hasFile('image')) {
-            // Hapus gambar lama HANYA jika itu file lokal (bukan link URL)
-            if ($article->image_url && Storage::disk('public')->exists($article->image_url)) {
+        // Logika pemilihan sumber gambar
+        if ($request->img_source == 'file' && $request->hasFile('image')) {
+            // Hapus gambar lama jika ada dan itu file lokal (bukan URL)
+            if ($article->image_url && !Str::startsWith($article->image_url, 'http') && Storage::disk('public')->exists($article->image_url)) {
                 Storage::disk('public')->delete($article->image_url);
             }
             $article->image_url = $request->file('image')->store('articles', 'public');
+        } 
+        elseif ($request->img_source == 'url' && $request->filled('image_url')) {
+            // Hapus file lokal lama jika ada
+            if ($article->image_url && !Str::startsWith($article->image_url, 'http') && Storage::disk('public')->exists($article->image_url)) {
+                Storage::disk('public')->delete($article->image_url);
+            }
+            $article->image_url = $request->image_url;
         }
 
         $article->update([
             'title' => $request->title,
-            'slug' => Str::slug($request->title) . '-' . time(),
             'content' => $request->content,
         ]);
 
-        return redirect()->back()->with('success', 'Arsip berhasil diperbarui!');
+        return redirect()->route('home')->with('success', 'Artikel berhasil diperbarui!');
     }
 
-    // HAPUS Artikel
+    // Menghapus artikel
     public function destroy($id)
     {
         $article = Article::findOrFail($id);
         
-        // Hapus file dari storage jika ada (cek apakah path-nya file lokal)
-        if ($article->image_url && Storage::disk('public')->exists($article->image_url)) {
+        // Hapus file dari storage hanya jika itu file lokal (bukan URL)
+        if ($article->image_url && !Str::startsWith($article->image_url, 'http') && Storage::disk('public')->exists($article->image_url)) {
             Storage::disk('public')->delete($article->image_url);
         }
 
         $article->delete();
 
-        return redirect()->back()->with('success', 'Artikel telah dihapus dari arsip.');
+        return redirect()->back()->with('success', 'Artikel berhasil dihapus!');
     }
 }

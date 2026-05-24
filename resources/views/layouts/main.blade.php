@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jema.Archive | Personal Blog</title>
+    <title>Najma Archive | Personal Blog</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -11,9 +11,10 @@
 
     <style>
         :root {
-            --primary: #800020; /* Maroon */
-            --accent: #d4af37;  /* Gold */
-            --bg-soft: #fcfbf7;
+            /* Warna diselaraskan dengan gambar maroon gelap yang kamu sukai */
+            --primary: #3d0a0a; 
+            --accent: #d4af37;  
+            --bg-soft: #ffffff; /* Latar belakang murni putih */
         }
 
         body {
@@ -22,49 +23,66 @@
             color: #1e1b18;
         }
 
+        /* Navbar dengan latar belakang Maroon Gelap solid sesuai gambar */
         .navbar {
-            backdrop-filter: blur(10px);
-            background: rgba(252, 251, 247, 0.9) !important;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background: #3d0a0a !important;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
+        /* Logo Najma Archive berwarna putih solid terang */
         .navbar-brand {
             font-weight: 800;
             font-size: 1.5rem;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #ffffff !important;
+            letter-spacing: 1px;
         }
 
+        /* Menu link teks diubah jadi putih semi-transparan */
         .nav-link {
             font-weight: 600;
-            color: #1e1b18 !important;
+            color: rgba(255, 255, 255, 0.75) !important;
             margin: 0 10px;
             transition: 0.3s;
         }
 
+        /* Hover dan Active menu diberi warna putih murni */
         .nav-link:hover, .nav-link.active {
-            color: var(--primary) !important;
+            color: #ffffff !important;
         }
 
+        /* Tombol Let's Talk / Login */
         .btn-main {
-            background: var(--primary);
-            color: white;
+            background: #721c24;
+            color: white !important;
             border-radius: 50px;
-            padding: 10px 25px;
+            padding: 8px 22px;
+            font-weight: 600;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-main:hover {
+            background: #8a252e;
+            transform: translateY(-2px);
+        }
+
+        /* Tombol khusus Logout jika sudah login */
+        .btn-logout {
+            background: #dc3545;
+            color: white !important;
+            border-radius: 50px;
+            padding: 8px 22px;
             font-weight: 600;
             transition: 0.3s;
             border: none;
         }
 
-        .btn-main:hover {
-            background: #600018;
-            color: white;
+        .btn-logout:hover {
+            background: #bd2130;
             transform: translateY(-2px);
         }
 
-        /* Card Style Global */
         .card-custom {
             transition: transform 0.3s ease;
         }
@@ -75,7 +93,7 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg sticky-top">
+    <nav class="navbar navbar-expand-lg sticky-top navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">Jema.Archive</a>
             
@@ -94,9 +112,23 @@
                     <li class="nav-item">
                         <a class="nav-link {{ Request::is('profile') ? 'active' : '' }}" href="{{ route('profile') }}">Profile</a>
                     </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="btn btn-main shadow-sm" href="{{ route('contact') }}">Let's Talk</a>
+                    <li class="nav-item">
+                        <a class="nav-link {{ Request::is('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Contact</a>
                     </li>
+
+                    {{-- Logika Authentication Tombol Pojok Kanan --}}
+                    @auth
+                        <li class="nav-item ms-lg-3">
+                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-logout shadow-sm">Logout</button>
+                            </form>
+                        </li>
+                    @else
+                        <li class="nav-item ms-lg-3">
+                            <a class="btn btn-main shadow-sm" href="{{ route('login') }}">Login</a>
+                        </li>
+                    @endauth
                 </ul>
             </div>
         </div>
@@ -107,7 +139,7 @@
     </main>
 
     <footer class="py-5 text-center mt-5" style="border-top: 1px solid rgba(0,0,0,0.05)">
-        <p class="text-muted mb-0">Designed with|for Digital Explorers.</p>
+        <p class="text-muted mb-0">Designed with | for Digital Explorers.</p>
         <small class="text-muted mt-2 d-block">© 2026 Jema.Archive - Digital Diary</small>
     </footer>
 

@@ -16,7 +16,7 @@
 
     <div class="pt-5 mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0" style="color: #1e1b18;">Artikel Terbaru </h3>
+            <h3 class="fw-bold mb-0" style="color: #1e1b18;">Artikel Terbaru</h3>
             <a href="{{ route('articles.index') }}" class="text-decoration-none fw-bold" style="color: #800020;">Lihat Semua →</a>
         </div>
         
@@ -41,12 +41,22 @@
                         </p>
                         
                         <div class="mt-auto">
-                            <a href="{{ route('articles.index') }}" class="text-decoration-none fw-bold d-inline-flex align-items-center transition" style="color: #800020; font-size: 0.85rem; letter-spacing: 0.5px;">
-                                READ MORE 
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-arrow-right-short ms-1" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
-                                </svg>
+                            {{-- READ MORE --}}
+                            <a href="{{ route('articles.show', $article->id) }}" class="text-decoration-none fw-bold d-inline-flex align-items-center mb-3" style="color: #800020; font-size: 0.85rem; letter-spacing: 0.5px;">
+                                READ MORE →
                             </a>
+
+                            {{-- Edit & Hapus --}}
+                            @auth
+                            <div class="action-buttons">
+                                <a href="{{ route('articles.edit', $article->id) }}" class="btn-edit">Edit</a>
+                                <form action="{{ route('articles.destroy', $article->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-delete" onclick="return confirm('Yakin hapus artikel ini?')">Hapus</button>
+                                </form>
+                            </div>
+                            @endauth
                         </div>
                     </div>
                 </div>
@@ -57,7 +67,6 @@
 </div>
 
 <style>
-    /* Tambahan agar efek hover lebih smooth */
     .card-custom {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
@@ -69,6 +78,44 @@
         opacity: 0.7;
         padding-left: 5px;
         transition: 0.3s;
+    }
+    
+    /* Perbaikan untuk tombol Edit dan Hapus */
+    .action-buttons {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+    
+    .btn-edit {
+        color: #d4a837 !important;
+        text-decoration: none !important;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        line-height: normal;
+        vertical-align: middle;
+    }
+    
+    .btn-delete {
+        background: none !important;
+        border: none !important;
+        color: #dc3545 !important;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+        line-height: normal;
+        vertical-align: middle;
+    }
+    
+    .btn-edit:hover,
+    .btn-delete:hover {
+        opacity: 0.7;
     }
 </style>
 @endsection
