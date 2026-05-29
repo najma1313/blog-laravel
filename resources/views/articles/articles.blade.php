@@ -8,12 +8,24 @@
             <p class="text-muted">Buat narasi baru atau dokumentasikan petualanganmu di sini.</p>
         </div>
         
-        {{-- Tombol Tulis Artikel - HANYA untuk user yang login --}}
         @auth
         <button class="btn px-4 text-white shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambah" style="background-color: #800020; border-radius: 50px;">
             <i class="bi bi-pencil-fill me-2"></i>Tulis Artikel
         </button>
         @endauth
+    </div>
+
+    {{-- Filter Kategori --}}
+    <div class="d-flex gap-3 mb-4 flex-wrap">
+        <a href="{{ route('articles.index', ['category' => 'semua']) }}" 
+           class="btn-filter {{ ($activeCategory ?? 'semua') == 'semua' ? 'active' : '' }}">Semua</a>
+        
+        @foreach($categories as $cat)
+        <a href="{{ route('articles.index', ['category' => $cat->slug]) }}" 
+           class="btn-filter {{ ($activeCategory ?? '') == $cat->slug ? 'active' : '' }}">
+            {{ $cat->name }}
+        </a>
+        @endforeach
     </div>
 
     @if(session('success'))
@@ -23,37 +35,61 @@
         </div>
     @endif
 
+    {{-- GRID 3 KOLOM --}}
     <div class="row g-4">
-        @foreach($articles as $article)
+        @forelse($articles as $article)
         <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden card-hover">
-                <div style="height: 220px; overflow: hidden; background-color: #f8f9fa;">
-                    @if(Str::startsWith($article->image_url, 'articles/'))
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden card-custom d-flex flex-column">
+                {{-- Gambar --}}
+                <div class="img-container" style="height: 200px; width: 100%; overflow: hidden;">
+                    @if($article->image_url && Str::startsWith($article->image_url, 'articles/'))
                         <img src="{{ asset('storage/' . $article->image_url) }}" class="w-100 h-100" style="object-fit: cover;">
+                    @elseif($article->image_url)
+                        <img src="{{ $article->image_url }}" class="w-100 h-100" style="object-fit: cover;" onerror="this.src='https://placehold.co/600x400?text=No+Image'">
                     @else
-                        <img src="{{ $article->image_url }}" class="w-100 h-100" style="object-fit: cover;" onerror="this.src='https://placehold.co/600x400?text=Image+Not+Found'">
+                        <img src="https://placehold.co/600x400?text=No+Image" class="w-100 h-100" style="object-fit: cover;">
                     @endif
                 </div>
-
-                <div class="card-body p-4 d-flex flex-column">
-                    <h5 class="fw-bold mb-2">{{ $article->title }}</h5>
-                    <p class="text-muted small mb-4">{{ Str::limit($article->content, 90) }}</p>
+                
+                <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                    {{-- BADGE MAROON DENGAN TULISAN PUTIH DI TENGAH --}}
+                    <div class="text-center mb-3">
+                        <span class="badge-category" style="background: #800020; color: white; border-radius: 50px; font-size: 0.7rem; padding: 5px 15px; display: inline-block;">
+                            {{ strtoupper($article->category->name ?? 'UMUM') }}
+                        </span>
+                    </div>
                     
-                    {{-- READ MORE (muncul untuk semua user) --}}
+                    <h5 class="card-title fw-bold mb-3 text-center" style="line-height: 1.4; font-size: 1.1rem;">{{ $article->title }}</h5>
+                    <p class="card-text text-muted mb-4 text-center" style="font-size: 0.9rem;">
+                        {{ Str::limit($article->content, 80) }}
+                    </p>
+                    
                     <div class="mt-auto">
-                        <a href="{{ route('articles.show', $article->id) }}" class="text-decoration-none fw-bold d-inline-flex align-items-center mb-3" style="color: #800020; font-size: 0.85rem; letter-spacing: 0.5px;">
-                            READ MORE →
-                        </a>
+                        {{-- READ MORE di tengah --}}
+                        <div class="text-center mb-3">
+                            <a href="{{ route('articles.show', $article->id) }}" class="text-decoration-none fw-bold d-inline-flex align-items-center transition" style="color: #800020; font-size: 0.85rem; letter-spacing: 0.5px;">
+                                READ MORE 
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-arrow-right-short ms-1" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
+                                </svg>
+                            </a>
+                        </div>
 
-                        {{-- Edit & Hapus (HANYA untuk user yang login) --}}
+                        {{-- Edit & Hapus  --}}
                         @auth
-                        <div class="d-flex gap-3">
-                            <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $article->id }}" style="background: none; border: none; color: #d4a837; font-size: 0.85rem; cursor: pointer; padding: 0;">Edit</button>
-                            <form action="{{ route('articles.destroy', $article->id) }}" method="POST" onsubmit="return confirm('Hapus artikel ini?')" class="d-inline">
-                                @csrf 
-                                @method('DELETE')
-                                <button type="submit" style="background: none; border: none; color: #dc3545; font-size: 0.85rem; cursor: pointer; padding: 0;">Hapus</button>
-                            </form>
+                        <div class="text-center">
+                            <div class="d-flex gap-4 justify-content-center">
+                                <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#modalEdit{{ $article->id }}">
+                                    <i class="bi bi-pencil-fill"></i> Edit
+                                </button>
+                                <form action="{{ route('articles.destroy', $article->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-delete" onclick="return confirm('Yakin hapus artikel ini?')">
+                                        <i class="bi bi-trash3-fill"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                         @endauth
                     </div>
@@ -61,113 +97,114 @@
             </div>
         </div>
 
-        {{-- Modal Edit (HANYA muncul jika user login, tapi aman karena ada @auth di atas) --}}
+        {{-- Modal Edit --}}
         @auth
         <div class="modal fade" id="modalEdit{{ $article->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 rounded-4 shadow-lg">
                     <div class="p-3 rounded-top-4" style="background-color: #800020;">
-                        <h5 class="text-white mb-0 px-2 fw-bold d-flex align-items-center">
-                            <i class="bi bi-pencil-square me-2"></i> Perbarui Artikel
-                        </h5>
+                        <h5 class="text-white mb-0 px-2 fw-bold">Perbarui Artikel</h5>
                     </div>
-                    
                     <form action="{{ route('articles.update', $article->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf @method('PUT')
+                        @csrf
+                        @method('PUT')
                         <div class="modal-body p-4">
                             <div class="mb-3">
-                                <label class="form-label fw-bold small text-secondary">Judul Artikel <span class="text-danger">*</span></label>
-                                <input type="text" name="title" class="form-control bg-light border-0 py-2" value="{{ $article->title }}" required>
+                                <label class="form-label fw-bold">Judul Artikel</label>
+                                <input type="text" name="title" class="form-control" value="{{ $article->title }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Kategori</label>
+                                <select name="category_id" class="form-select" required>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ $article->category_id == $cat->id ? 'selected' : '' }}>
+                                            {{ $cat->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="mb-4">
-                                <label class="form-label fw-bold small text-secondary">Isi Cerita <span class="text-danger">*</span></label>
-                                <textarea name="content" rows="5" class="form-control bg-light border-0" required>{{ $article->content }}</textarea>
+                                <label class="form-label fw-bold">Isi Cerita</label>
+                                <textarea name="content" rows="5" class="form-control" required>{{ $article->content }}</textarea>
                             </div>
-
                             <div class="mb-3">
-                                <label class="form-label fw-bold small text-secondary">Gambar Utama</label>
+                                <label class="form-label fw-bold">Gambar</label>
                                 <div class="d-flex gap-2 mb-3">
-                                    <input type="radio" class="btn-check" name="img_source_{{ $article->id }}" id="editF{{ $article->id }}" value="file" checked onclick="toggleEdit('file', {{ $article->id }})">
-                                    <label class="btn btn-outline-custom flex-fill py-3 d-flex flex-column align-items-center gap-2" for="editF{{ $article->id }}">
-                                        <i class="bi bi-cloud-arrow-up fs-4"></i>
-                                        <span class="small fw-bold">Upload Lokal</span>
-                                    </label>
-
-                                    <input type="radio" class="btn-check" name="img_source_{{ $article->id }}" id="editL{{ $article->id }}" value="url" onclick="toggleEdit('url', {{ $article->id }})">
-                                    <label class="btn btn-outline-custom flex-fill py-3 d-flex flex-column align-items-center gap-2" for="editL{{ $article->id }}">
-                                        <i class="bi bi-link-45deg fs-4"></i>
-                                        <span class="small fw-bold">Tautan URL</span>
-                                    </label>
+                                    <input type="radio" class="btn-check" name="img_source" id="editFile{{ $article->id }}" value="file" checked onclick="toggleEdit('file', {{ $article->id }})">
+                                    <label class="btn-outline-custom flex-fill py-2 text-center" for="editFile{{ $article->id }}">Upload File</label>
+                                    <input type="radio" class="btn-check" name="img_source" id="editUrl{{ $article->id }}" value="url" onclick="toggleEdit('url', {{ $article->id }})">
+                                    <label class="btn-outline-custom flex-fill py-2 text-center" for="editUrl{{ $article->id }}">URL Gambar</label>
                                 </div>
-                                
-                                <div id="boxFileEdit{{ $article->id }}" class="p-3 border border-dashed rounded-3 bg-white">
-                                    <input type="file" name="image" class="form-control form-control-sm border-0 shadow-none">
-                                    <div class="mt-1 text-muted" style="font-size: 0.7rem;">Format: JPG, PNG (Max 2MB)</div>
+                                <div id="boxFileEdit{{ $article->id }}">
+                                    <input type="file" name="image" class="form-control">
                                 </div>
                                 <div id="boxUrlEdit{{ $article->id }}" style="display: none;">
-                                    <input type="url" name="image_url" class="form-control bg-light border-0" placeholder="https://..." value="{{ !Str::startsWith($article->image_url, 'articles/') ? $article->image_url : '' }}">
+                                    <input type="url" name="image_url" class="form-control" placeholder="https://...">
                                 </div>
                             </div>
                         </div>
                         <div class="px-4 pb-4">
-                            <button type="submit" class="btn w-100 text-white fw-bold py-2 shadow-sm" style="background-color: #800020; border-radius: 12px;">Simpan Perubahan</button>
+                            <button type="submit" class="btn w-100 text-white fw-bold py-2" style="background-color: #800020; border-radius: 12px;">Simpan Perubahan</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
         @endauth
-        @endforeach
+        @empty
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">Belum ada artikel di kategori ini.</p>
+        </div>
+        @endforelse
     </div>
 </div>
 
-{{-- Modal Tambah Artikel (HANYA untuk user yang login) --}}
+{{-- Modal Tambah Artikel --}}
 @auth
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow-lg">
             <div class="p-3 rounded-top-4" style="background-color: #800020;">
-                <h5 class="text-white mb-0 px-2 fw-bold d-flex align-items-center">
-                    <i class="bi bi-plus-circle me-2"></i> Publikasi Baru
-                </h5>
+                <h5 class="text-white mb-0 px-2 fw-bold">Publikasi Baru</h5>
             </div>
             <form action="{{ route('articles.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-secondary">Judul Artikel <span class="text-danger">*</span></label>
-                        <input type="text" name="title" class="form-control bg-light border-0 py-2" placeholder="Apa judul ceritamu hari ini?" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-secondary">Isi Cerita <span class="text-danger">*</span></label>
-                        <textarea name="content" rows="5" class="form-control bg-light border-0" placeholder="Tuliskan konten lengkap disini..." required></textarea>
+                        <label class="form-label fw-bold">Judul Artikel</label>
+                        <input type="text" name="title" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold small text-secondary">Gambar Utama</label>
+                        <label class="form-label fw-bold">Kategori</label>
+                        <select name="category_id" class="form-select" required>
+                            <option value="">Pilih Kategori</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Isi Cerita</label>
+                        <textarea name="content" rows="5" class="form-control" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Gambar</label>
                         <div class="d-flex gap-2 mb-3">
                             <input type="radio" class="btn-check" name="img_source" id="addF" value="file" checked onclick="toggleAdd('file')">
-                            <label class="btn btn-outline-custom flex-fill py-3 d-flex flex-column align-items-center gap-2" for="addF">
-                                <i class="bi bi-cloud-arrow-up fs-4"></i>
-                                <span class="small fw-bold">Upload Lokal</span>
-                            </label>
-
+                            <label class="btn-outline-custom flex-fill py-2 text-center" for="addF">Upload File</label>
                             <input type="radio" class="btn-check" name="img_source" id="addL" value="url" onclick="toggleAdd('url')">
-                            <label class="btn btn-outline-custom flex-fill py-3 d-flex flex-column align-items-center gap-2" for="addL">
-                                <i class="bi bi-link-45deg fs-4"></i>
-                                <span class="small fw-bold">Tautan URL</span>
-                            </label>
+                            <label class="btn-outline-custom flex-fill py-2 text-center" for="addL">URL Gambar</label>
                         </div>
-                        <div id="boxFileAdd" class="p-3 border border-dashed rounded-3 bg-white">
-                            <input type="file" name="image" class="form-control form-control-sm border-0 shadow-none">
-                            <div class="mt-1 text-muted" style="font-size: 0.7rem;">Format: JPG, PNG (Max 2MB)</div>
+                        <div id="boxFileAdd">
+                            <input type="file" name="image" class="form-control">
                         </div>
                         <div id="boxUrlAdd" style="display: none;">
-                            <input type="url" name="image_url" class="form-control bg-light border-0" placeholder="Masukkan link gambar disini...">
+                            <input type="url" name="image_url" class="form-control" placeholder="https://...">
                         </div>
                     </div>
                 </div>
                 <div class="px-4 pb-4">
-                    <button type="submit" class="btn w-100 text-white fw-bold py-2 shadow-sm" style="background-color: #800020; border-radius: 12px;">Tampilkan Artikel</button>
+                    <button type="submit" class="btn w-100 text-white fw-bold py-2" style="background-color: #800020; border-radius: 12px;">Tampilkan Artikel</button>
                 </div>
             </form>
         </div>
@@ -176,44 +213,74 @@
 @endauth
 
 <style>
-    .card-hover { transition: 0.3s; }
-    .card-hover:hover { transform: translateY(-5px); }
+    .card-custom {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-custom:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(128, 0, 32, 0.1) !important;
+    }
+    
+    .btn-filter {
+        padding: 8px 20px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        background-color: #f0f0f0;
+        color: #333;
+        transition: 0.3s;
+    }
+    .btn-filter:hover, .btn-filter.active {
+        background-color: #800020;
+        color: white;
+    }
+    
+    .btn-edit {
+        background: none;
+        border: none;
+        color: #6c6a69;
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 0;
+    }
+    .btn-delete {
+        background: none;
+        border: none;
+        color: #6c6a69;
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 0;
+    }
     
     .btn-outline-custom {
-        color: #495057;
         border: 1px solid #dee2e6;
-        background-color: #fff;
-        border-radius: 12px;
-        transition: 0.2s;
+        border-radius: 8px;
+        background: white;
+        padding: 8px;
+        cursor: pointer;
     }
     .btn-check:checked + .btn-outline-custom {
-        background-color: #fff;
         border-color: #800020;
         color: #800020;
-        box-shadow: 0 0 0 1px #800020;
+        background-color: #fff0f0;
     }
     
-    .border-dashed {
-        border-style: dashed !important;
-        border-width: 2px !important;
-        border-color: #dee2e6 !important;
-    }
-    
-    .form-control:focus {
-        border: 1px solid #800020;
-        box-shadow: none;
-        background: #fff !important;
+    .transition:hover {
+        opacity: 0.7;
+        padding-left: 5px;
+        transition: 0.3s;
     }
 </style>
 
 <script>
     function toggleAdd(type) {
-        document.getElementById('boxFileAdd').style.display = (type === 'file') ? 'block' : 'none';
-        document.getElementById('boxUrlAdd').style.display = (type === 'url') ? 'block' : 'none';
+        document.getElementById('boxFileAdd').style.display = type === 'file' ? 'block' : 'none';
+        document.getElementById('boxUrlAdd').style.display = type === 'url' ? 'block' : 'none';
     }
+    
     function toggleEdit(type, id) {
-        document.getElementById('boxFileEdit' + id).style.display = (type === 'file') ? 'block' : 'none';
-        document.getElementById('boxUrlEdit' + id).style.display = (type === 'url') ? 'block' : 'none';
+        document.getElementById('boxFileEdit' + id).style.display = type === 'file' ? 'block' : 'none';
+        document.getElementById('boxUrlEdit' + id).style.display = type === 'url' ? 'block' : 'none';
     }
 </script>
 @endsection

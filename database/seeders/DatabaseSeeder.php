@@ -4,12 +4,19 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Article;
+use App\Models\Category; // Pastikan ini di-import
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // 1. Membuat data Kategori agar Dropdown di Modal tidak kosong
+        Category::firstOrCreate(['name' => 'Teknologi'], ['slug' => 'teknologi']);
+        Category::firstOrCreate(['name' => 'Edukasi'], ['slug' => 'edukasi']);
+        Category::firstOrCreate(['name' => 'Hiburan'], ['slug' => 'hiburan']);
+
+        // 2. Data 6 Artikel Awalmu
         $articles = [
             ['title' => 'Menjelajahi Keindahan Gunung Merbabu', 'img' => 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800'],
             ['title' => 'Eksplorasi Estetika Fotografi Analog', 'img' => 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800'],
@@ -24,7 +31,8 @@ class DatabaseSeeder extends Seeder
                 'title' => $a['title'],
                 'slug' => Str::slug($a['title']),
                 'content' => 'Ini adalah konten lengkap untuk artikel mengenai ' . $a['title'] . '. Isinya membahas detail, tips, trik, serta dokumentasi perjalanan atau pengerjaan project secara mendalam.',
-                'image_url' => $a['img']
+                'image_url' => $a['img'],
+                'category_id' => null // Set null dulu, nanti bisa kamu ubah lewat tombol Edit!
             ]);
         }
     }

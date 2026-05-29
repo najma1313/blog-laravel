@@ -18,6 +18,18 @@
                             <input type="text" name="title" class="form-control" value="{{ old('title', $article->title) }}" required>
                         </div>
 
+                        {{-- DROPDOWN KATEGORI --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Kategori</label>
+                            <select name="category_id" class="form-select" required>
+                                @foreach($categories ?? [] as $cat)
+                                    <option value="{{ $cat->id }}" {{ $article->category_id == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">Konten Artikel</label>
                             <textarea name="content" rows="10" class="form-control" required>{{ old('content', $article->content) }}</textarea>
@@ -26,7 +38,6 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Gambar Utama</label>
                             
-                            {{-- Pilihan sumber gambar --}}
                             <div class="d-flex gap-2 mb-3">
                                 <input type="radio" class="btn-check" name="img_source" id="editFile" value="file" checked onclick="toggleImageSource('file')">
                                 <label class="btn btn-outline-custom flex-fill py-3 d-flex flex-column align-items-center gap-2" for="editFile">
@@ -41,7 +52,6 @@
                                 </label>
                             </div>
 
-                            {{-- Upload file lokal --}}
                             <div id="boxFileEdit" class="p-3 border border-dashed rounded-3 bg-white">
                                 @if($article->image_url && !Str::startsWith($article->image_url, 'http'))
                                     <div class="mb-2">
@@ -52,7 +62,6 @@
                                 <div class="mt-1 text-muted" style="font-size: 0.7rem;">Format: JPG, PNG (Max 2MB)</div>
                             </div>
 
-                            {{-- Input URL gambar --}}
                             <div id="boxUrlEdit" style="display: none;">
                                 @if($article->image_url && Str::startsWith($article->image_url, 'http'))
                                     <div class="mb-2">

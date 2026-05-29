@@ -23,16 +23,20 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'index'])->name('login');
     Route::post('/login', [LoginController::class, 'authenticate']);
     Route::get('/register', [LoginController::class, 'register'])->name('register');
-    Route::post('/register', [LoginController::class, 'storeRegister']);  // ← perbaiki jadi storeRegister
+    Route::post('/register', [LoginController::class, 'storeRegister']);  
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Route yang memerlukan login (auth)
 Route::middleware('auth')->group(function () {
-    Route::get('/articles/create', [BlogController::class, 'create'])->name('articles.create');  // ← perbaiki jadi create
-    Route::get('/articles/{id}/edit', [BlogController::class, 'edit'])->name('articles.edit');  // ← perbaiki jadi edit
-    Route::post('/articles', [BlogController::class, 'store'])->name('articles.store');  // ← perbaiki jadi store
-    Route::put('/articles/{id}', [BlogController::class, 'update'])->name('articles.update');  // ← perbaiki jadi update
-    Route::delete('/articles/{id}', [BlogController::class, 'destroy'])->name('articles.destroy');  // ← perbaiki jadi destroy
+    Route::get('/articles/create', [BlogController::class, 'create'])->name('articles.create');  
+    Route::get('/articles/{id}/edit', [BlogController::class, 'edit'])->name('articles.edit');  
+    Route::post('/articles', [BlogController::class, 'store'])->name('articles.store');  
+    Route::put('/articles/{id}', [BlogController::class, 'update'])->name('articles.update');  
+    Route::delete('/articles/{id}', [BlogController::class, 'destroy'])->name('articles.destroy');  
+});
+
+Route::get('/home', function () {
+    return redirect()->route('articles.index');
 });

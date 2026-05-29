@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Category; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -12,43 +13,60 @@ class BlogController extends Controller
     // Menampilkan halaman Home dengan 3 artikel terbaru
     public function home()
     {
-        $latestArticles = Article::latest()->take(3)->get();
+        $latestArticles = Article::with('category')->latest()->take(3)->get();
         return view('pages.home', compact('latestArticles'));
     }
 
     // Menampilkan semua artikel
-    public function index()
-    {
-        $articles = Article::latest()->get();
-        return view('articles.articles', compact('articles'));
+    public function index(Request $request)
+{
+    $categorySlug = $request->get('category', 'semua');
+    
+    if ($categorySlug && $categorySlug != 'semua') {
+        $category = Category::where('slug', $categorySlug)->first();
+        if ($category) {
+            $articles = Article::with('category')->where('category_id', $category->id)->latest()->get();
+        } else {
+            $articles = Article::with('category')->latest()->get();
+        }
+    } else {
+        $articles = Article::with('category')->latest()->get();
     }
+    
+    $categories = Category::all();
+    $activeCategory = $categorySlug;
+    
+    return view('articles.articles', compact('articles', 'categories', 'activeCategory'));
+}
 
     // Menampilkan detail artikel (READ MORE)
     public function show($id)
     {
-        $article = Article::findOrFail($id);
+        $article = Article::with('category')->findOrFail($id);
         return view('articles.show', compact('article'));
     }
 
     // Menampilkan form edit artikel
     public function edit($id)
-    {
-        $article = Article::findOrFail($id);
-        return view('articles.edit', compact('article'));
-    }
+{
+    $article = Article::findOrFail($id);
+    $categories = Category::all();
+    return view('articles.edit', compact('article', 'categories'));
+}
 
     // Menampilkan form create artikel
     public function create()
-    {
-        return view('articles.create');
-    }
-
+{
+    $categories = Category::all();
+    return view('articles.create', compact('categories'));
+}
     // Menyimpan artikel baru
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|min:5|max:255',
             'content' => 'required|min:10',
+            'category_id' => 'required|exists:categories,id', // Validasi kategori wajib
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
             'image_url' => 'nullable|url',
         ]);
@@ -63,6 +81,7 @@ class BlogController extends Controller
 
         Article::create([
             'title' => $request->title,
+            'category_id' => $request->category_id, // SIMPAN KATEGORI DI SINI
             'slug' => Str::slug($request->title) . '-' . time(),
             'content' => $request->content,
             'image_url' => $finalImagePath, 
@@ -71,7 +90,7 @@ class BlogController extends Controller
         return redirect()->back()->with('success', 'Artikel berhasil diterbitkan!');
     }
 
-    // Mengupdate artikel (dengan dukungan file upload & URL)
+    // Mengupdate artikel
     public function update(Request $request, $id)
     {
         $article = Article::findOrFail($id);
@@ -79,32 +98,32 @@ class BlogController extends Controller
         $request->validate([
             'title' => 'required|min:5',
             'content' => 'required',
+            'category_id' => 'required|exists:categories,id', // Validasi kategori saat edit
             'image' => 'nullable|image|max:2048',
             'image_url' => 'nullable|url',
         ]);
 
-        // Logika pemilihan sumber gambar
         if ($request->img_source == 'file' && $request->hasFile('image')) {
-            // Hapus gambar lama jika ada dan itu file lokal (bukan URL)
             if ($article->image_url && !Str::startsWith($article->image_url, 'http') && Storage::disk('public')->exists($article->image_url)) {
                 Storage::disk('public')->delete($article->image_url);
             }
             $article->image_url = $request->file('image')->store('articles', 'public');
         } 
         elseif ($request->img_source == 'url' && $request->filled('image_url')) {
-            // Hapus file lokal lama jika ada
             if ($article->image_url && !Str::startsWith($article->image_url, 'http') && Storage::disk('public')->exists($article->image_url)) {
                 Storage::disk('public')->delete($article->image_url);
             }
             $article->image_url = $request->image_url;
         }
 
+        // Tambahkan pengubahan category_id saat diupdate
         $article->update([
             'title' => $request->title,
+            'category_id' => $request->category_id, // UPDATE KATEGORI DI SINI
             'content' => $request->content,
         ]);
 
-        return redirect()->route('home')->with('success', 'Artikel berhasil diperbarui!');
+        return redirect()->route('articles.index')->with('success', 'Artikel berhasil diperbarui!');
     }
 
     // Menghapus artikel
@@ -112,7 +131,6 @@ class BlogController extends Controller
     {
         $article = Article::findOrFail($id);
         
-        // Hapus file dari storage hanya jika itu file lokal (bukan URL)
         if ($article->image_url && !Str::startsWith($article->image_url, 'http') && Storage::disk('public')->exists($article->image_url)) {
             Storage::disk('public')->delete($article->image_url);
         }

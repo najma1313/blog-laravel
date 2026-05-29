@@ -8,13 +8,28 @@ use App\Models\Article;
 class ArticleController extends Controller
 {
     // tampil artikel
-    public function index()
-    {
-        $articles = Article::latest()->get();
+   public function index(Request $request)
+{
+    // Ambil semua kategori untuk tombol filter
+    $categories = \App\Models\Category::all();
 
-        return view('articles', compact('articles'));
+    // Mulai query
+    $query = \App\Models\Article::query();
+
+    // FILTER LOGIC
+    if ($request->has('category') && !empty($request->category)) {
+        // Kita filter berdasarkan 'slug' yang ada di tabel categories
+        $query->whereHas('category', function($q) use ($request) {
+            $q->where('slug', $request->category);
+        });
     }
 
+    // Ambil data yang sudah difilter
+    $articles = $query->latest()->get();
+
+    // Kirim data ke view (Pastikan namanya 'articles.articles')
+    return view('articles.articles', compact('articles', 'categories'));
+}
     // form tambah
     public function create()
     {
